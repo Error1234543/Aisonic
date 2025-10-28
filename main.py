@@ -1,8 +1,7 @@
-
 import os
 import telebot
 from flask import Flask, request
-from openai import OpenAI
+import openai
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -10,7 +9,7 @@ OWNER_ID = int(os.getenv("OWNER_ID", "7447651332"))
 GROUP_ID = int(os.getenv("GROUP_ID", "-1002432150473"))
 
 bot = telebot.TeleBot(BOT_TOKEN)
-client = OpenAI(api_key=OPENAI_API_KEY)
+openai.api_key = OPENAI_API_KEY
 app = Flask(__name__)
 
 @app.route("/" + BOT_TOKEN, methods=["POST"])
@@ -39,7 +38,7 @@ def handle_message(message):
 
     try:
         question = message.text
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a Gujarati NEET/JEE tutor."},
