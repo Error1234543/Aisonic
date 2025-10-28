@@ -10,9 +10,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # === Owner & Access Control ===
-OWNER_ID = 7447651332          # 👈 Replace with your Telegram ID
-ALLOWED_GROUP_ID = -1001234567890  # 👈 Replace with your group ID
-AUTHORIZED_USERS = set([OWNER_ID])  # Initially only owner allowed
+OWNER_ID = 8226637107          # 👈 Replace with your Telegram ID
+ALLOWED_GROUP_ID = -1003126293720 # 👈 Replace with your group ID
+AUTHORIZED_USERS = set([8226637107])  # Initially only owner allowed
 
 # === Flask app for Koyeb health check ===
 app = Flask(__name__)
