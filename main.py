@@ -1,24 +1,27 @@
 import os
 import telebot
-from flask import Flask, request
-import openai
+from flask import Flask
+from threading import Thread
+from openai import OpenAI
 
+# --- Load Environment Variables ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OWNER_ID = int(os.getenv("OWNER_ID", "8226637107"))
-GROUP_ID = int(os.getenv("GROUP_ID", "-1003126293720"))
+OWNER_ID = int(os.getenv("OWNER_ID", "7447651332"))
+GROUP_ID = int(os.getenv("GROUP_ID", "-1002432150473"))
 
+# --- Initialize Bot & OpenAI ---
 bot = telebot.TeleBot(BOT_TOKEN)
-openai.api_key = OPENAI_API_KEY
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+# --- Flask app for Koyeb health check ---
 app = Flask(__name__)
 
-@app.route("/" + BOT_TOKEN, methods=["POST"])
-def webhook():
-    json_str = request.stream.read().decode("UTF-8")
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return "OK", 200
+@app.route('/')
+def home():
+    return "✅ AI Doubt Solver Bot is running!"
 
+# --- Telegram Bot Handlers ---
 @bot.message_handler(commands=["start"])
 def start(message):
     if message.from_user.id == OWNER_ID:
@@ -38,8 +41,8 @@ def handle_message(message):
 
     try:
         question = message.text
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a Gujarati NEET/JEE tutor."},
                 {"role": "user", "content": question},
@@ -50,5 +53,10 @@ def handle_message(message):
     except Exception as e:
         bot.reply_to(message, f"⚠️ Error: {str(e)}")
 
-if __name__ == "__main__":
+# --- Run Flask + Telegram Polling Together ---
+def run_flask():
     app.run(host="0.0.0.0", port=8000)
+
+if __name__ == "__main__":
+    Thread(target=run_flask).start()
+    bot.infinity_polling()
