@@ -1,9 +1,5 @@
-FROM python:3.10-slim
-
+FROM python:3.10
 WORKDIR /app
 COPY . .
-
 RUN pip install --no-cache-dir -r requirements.txt
-
-EXPOSE 8000
-ENTRYPOINT ["python3", "main.py"]
+CMD ["python", "main.py"]
