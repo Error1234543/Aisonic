@@ -5,8 +5,8 @@ import openai
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OWNER_ID = int(os.getenv("OWNER_ID", "7447651332"))
-GROUP_ID = int(os.getenv("GROUP_ID", "-1002432150473"))
+OWNER_ID = int(os.getenv("OWNER_ID", "8226637107"))
+GROUP_ID = int(os.getenv("GROUP_ID", "-1003126293720"))
 
 bot = telebot.TeleBot(BOT_TOKEN)
 openai.api_key = OPENAI_API_KEY
