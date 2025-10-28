@@ -1,3 +1,3 @@
-telebot
-openai==0.28
 flask
+pyTelegramBotAPI
+openai>=1.0.0
