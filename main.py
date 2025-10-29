@@ -49,13 +49,14 @@ def is_allowed(user_id, chat_id):
 # ====== GEMINI REQUEST ======
 def ask_gemini(prompt, image_bytes=None):
     try:
-        url = url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-
- contents = [{"parts": [{"text": prompt}]}]
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        contents = [{"parts": [{"text": prompt}]}]
 
         if image_bytes:
             b64 = base64.b64encode(image_bytes).decode("utf-8")
-            contents[0]["parts"].append({"inline_data": {"mime_type": "image/jpeg", "data": b64}})
+            contents[0]["parts"].append({
+                "inline_data": {"mime_type": "image/jpeg", "data": b64}
+            })
 
         res = requests.post(url, json={"contents": contents}, timeout=60)
         res.raise_for_status()
