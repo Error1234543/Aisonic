@@ -5,7 +5,7 @@ import requests
 import telebot
 from flask import Flask
 
-# ====== CONFIG ======
+# ===== CONFIG =====
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 OWNER_ID = int(os.getenv("OWNER_ID", "7447651332"))
@@ -20,7 +20,7 @@ requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook")
 bot = telebot.TeleBot(BOT_TOKEN)
 AUTH_FILE = "auth.json"
 
-# ====== AUTH SYSTEM ======
+# ===== AUTH SYSTEM =====
 if not os.path.exists(AUTH_FILE):
     default = {"owners": [OWNER_ID], "allowed_users": [OWNER_ID], "allowed_groups": []}
     with open(AUTH_FILE, "w") as f:
@@ -46,12 +46,13 @@ def is_allowed(user_id, chat_id):
         or chat_id in auth["allowed_groups"]
     )
 
-# ====== GEMINI REQUEST ======
+# ===== GEMINI REQUEST =====
 def ask_gemini(prompt, image_bytes=None):
     try:
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-        contents = [{"parts": [{"text": prompt}]}]
+        # ✅ Correct new endpoint and model
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_API_KEY}"
 
+        contents = [{"parts": [{"text": prompt}]}]
         if image_bytes:
             b64 = base64.b64encode(image_bytes).decode("utf-8")
             contents[0]["parts"].append({
@@ -60,6 +61,7 @@ def ask_gemini(prompt, image_bytes=None):
 
         res = requests.post(url, json={"contents": contents}, timeout=60)
         res.raise_for_status()
+
         data = res.json()
         text = (
             data.get("candidates", [{}])[0]
@@ -67,11 +69,15 @@ def ask_gemini(prompt, image_bytes=None):
             .get("parts", [{}])[0]
             .get("text", "⚠️ No response from Gemini.")
         )
+
         return text.strip()
+
+    except requests.exceptions.HTTPError as e:
+        return f"❌ Gemini HTTP Error: {e.response.status_code} - {e.response.text}"
     except Exception as e:
         return f"❌ Gemini Error: {e}"
 
-# ====== COMMANDS ======
+# ===== COMMANDS =====
 @bot.message_handler(commands=["start"])
 def start(msg):
     if not is_allowed(msg.from_user.id, msg.chat.id):
@@ -115,7 +121,7 @@ def remove_user(msg):
     except Exception:
         bot.reply_to(msg, "⚠️ Usage: /remove <user_id>")
 
-# ====== TEXT & IMAGE HANDLERS ======
+# ===== TEXT & IMAGE HANDLERS =====
 @bot.message_handler(content_types=["text"])
 def text_query(msg):
     if not is_allowed(msg.from_user.id, msg.chat.id):
@@ -134,7 +140,7 @@ def image_query(msg):
     ans = ask_gemini("Solve this NEET/JEE question step-by-step:", image_bytes=img)
     bot.reply_to(msg, ans[:4000])
 
-# ====== FLASK HEALTH CHECK ======
+# ===== FLASK HEALTH CHECK =====
 app = Flask(__name__)
 
 @app.route("/")
